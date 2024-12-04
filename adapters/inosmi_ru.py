@@ -4,7 +4,7 @@ from .exceptions import ArticleNotFound
 from .html_tools import remove_all_tags, remove_buzz_attrs, remove_buzz_tags
 
 
-def sanitize(html, plaintext=False):
+def sanitize(html: str, plaintext: bool = False) -> str:
     soup = BeautifulSoup(html, "html.parser")
     article = soup.select_one("div.layout-article")
 
