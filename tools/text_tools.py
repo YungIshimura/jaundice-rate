@@ -27,7 +27,9 @@ async def split_by_words(morph: MorphAnalyzer, text: str) -> List[str]:
         return words
 
 
-async def calculate_jaundice_rate(article_words: List[str], charged_words: List[str]) -> float:
+async def calculate_jaundice_rate(
+    article_words: List[str], charged_words: List[str]
+) -> float:
     """Расчитывает желтушность текста, принимает список "заряженных" слов и ищет их внутри article_words."""
 
     if not article_words:
