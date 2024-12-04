@@ -3,6 +3,10 @@ from main import analyze, process_article, ProcessingStatus
 import asyncio
 from unittest.mock import patch
 
+import pymorphy2
+from tools.text_tools import split_by_words, calculate_jaundice_rate
+from tools.mock_tools import mock_fetch_timeout
+
 
 def test_all_keys_in_error_response():
     articles = ["http://example.com/article1"]
@@ -45,10 +49,6 @@ def test_process_article_parsing_error():
     assert processed_articles[0]['Статус'] == ProcessingStatus.PARSING_ERROR
 
 
-async def mock_fetch_timeout(*args, **kwargs):
-    raise asyncio.TimeoutError("Timeout error")
-
-
 @pytest.mark.asyncio
 async def test_process_article_timeout_error():
     articles = ["https://inosmi.ru/20241203/pandemiya-271003793.html"]
@@ -59,3 +59,21 @@ async def test_process_article_timeout_error():
 
     assert len(processed_articles) == 1
     assert processed_articles[0]['Статус'] == ProcessingStatus.TIMEOUT
+
+
+def test_split_by_words():
+    morph = pymorphy2.MorphAnalyzer()
+
+    result = asyncio.run(split_by_words(morph, 'Во-первых, он хочет, чтобы'))
+    assert result == ['во-первых', 'хотеть', 'чтобы']
+
+    result = asyncio.run(split_by_words(morph, '«Удивительно, но это стало началом!»'))
+    assert result == ['удивительно', 'это', 'стать', 'начало']
+
+
+def test_calculate_jaundice_rate():
+    result = asyncio.run(calculate_jaundice_rate([], []))
+    assert -0.01 < result < 0.01
+
+    result = asyncio.run(calculate_jaundice_rate(['все', 'аутсайдер', 'побег'], ['аутсайдер', 'банкротство']))
+    assert 33.0 < result < 34.0

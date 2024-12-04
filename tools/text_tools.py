@@ -24,17 +24,6 @@ async def split_by_words(morph, text):
         return words
 
 
-def test_split_by_words():
-    morph = pymorphy2.MorphAnalyzer()
-
-    result = asyncio.run(split_by_words(morph, 'Во-первых, он хочет, чтобы'))
-    assert result == ['во-первых', 'хотеть', 'чтобы']
-
-    result = asyncio.run(split_by_words(morph, '«Удивительно, но это стало началом!»'))
-    assert result == ['удивительно', 'это', 'стать', 'начало']
-
-
-
 async def calculate_jaundice_rate(article_words, charged_words):
     """Расчитывает желтушность текста, принимает список "заряженных" слов и ищет их внутри article_words."""
 
@@ -46,11 +35,3 @@ async def calculate_jaundice_rate(article_words, charged_words):
     score = len(found_charged_words) / len(article_words) * 100
 
     return round(score, 2)
-
-
-def test_calculate_jaundice_rate():
-    result = asyncio.run(calculate_jaundice_rate([], []))
-    assert -0.01 < result < 0.01
-
-    result = asyncio.run(calculate_jaundice_rate(['все', 'аутсайдер', 'побег'], ['аутсайдер', 'банкротство']))
-    assert 33.0 < result < 34.0

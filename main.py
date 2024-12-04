@@ -10,7 +10,7 @@ from async_timeout import timeout
 
 from adapters.exceptions import ArticleNotFound
 from adapters.inosmi_ru import sanitize
-from text_tools import calculate_jaundice_rate, split_by_words
+from tools.text_tools import calculate_jaundice_rate, split_by_words
 
 # TODO продумать возможность для использования контекстного менеджера
 
