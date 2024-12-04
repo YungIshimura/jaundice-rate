@@ -1,11 +1,12 @@
-import pytest
-from main import analyze, process_article, ProcessingStatus
 import asyncio
 from unittest.mock import patch
 
 import pymorphy2
-from tools.text_tools import split_by_words, calculate_jaundice_rate
+import pytest
+
+from main import ProcessingStatus, analyze, process_article
 from tools.mock_tools import mock_fetch_timeout
+from tools.text_tools import calculate_jaundice_rate, split_by_words
 
 
 def test_all_keys_in_error_response():
@@ -13,10 +14,10 @@ def test_all_keys_in_error_response():
 
     processed_articles = asyncio.run(analyze(articles))
 
-    assert processed_articles[0].get('Статус', None) 
-    assert processed_articles[0].get('URL', None) 
-    assert processed_articles[0].get('Рейтинг', None)  == None
-    assert processed_articles[0].get('Слов в статье', None) == None
+    assert processed_articles[0].get("Статус", None)
+    assert processed_articles[0].get("URL", None)
+    assert processed_articles[0].get("Рейтинг", None) == None
+    assert processed_articles[0].get("Слов в статье", None) == None
 
 
 def test_all_keys_in_ok_response():
@@ -24,29 +25,29 @@ def test_all_keys_in_ok_response():
 
     processed_articles = asyncio.run(analyze(articles))
 
-    assert processed_articles[0].get('Статус', None) 
-    assert processed_articles[0].get('URL', None) 
-    assert processed_articles[0].get('Рейтинг', None)
-    assert processed_articles[0].get('Слов в статье', None)
-    assert processed_articles[0].get('INFO:root', None)
+    assert processed_articles[0].get("Статус", None)
+    assert processed_articles[0].get("URL", None)
+    assert processed_articles[0].get("Рейтинг", None)
+    assert processed_articles[0].get("Слов в статье", None)
+    assert processed_articles[0].get("INFO:root", None)
 
 
 def test_process_article_fetch_error():
     articles = ["http://example.com/article1"]
 
     processed_articles = asyncio.run(analyze(articles))
-    
+
     assert len(processed_articles) == 1
-    assert processed_articles[0]['Статус'] == ProcessingStatus.FETCH_ERROR
+    assert processed_articles[0]["Статус"] == ProcessingStatus.FETCH_ERROR
 
 
 def test_process_article_parsing_error():
     articles = ["https://lenta.ru/brief/2021/08/26/afg_terror/"]
 
     processed_articles = asyncio.run(analyze(articles))
-    
+
     assert len(processed_articles) == 1
-    assert processed_articles[0]['Статус'] == ProcessingStatus.PARSING_ERROR
+    assert processed_articles[0]["Статус"] == ProcessingStatus.PARSING_ERROR
 
 
 @pytest.mark.asyncio
@@ -58,22 +59,26 @@ async def test_process_article_timeout_error():
         await process_article(articles, processed_articles)
 
     assert len(processed_articles) == 1
-    assert processed_articles[0]['Статус'] == ProcessingStatus.TIMEOUT
+    assert processed_articles[0]["Статус"] == ProcessingStatus.TIMEOUT
 
 
 def test_split_by_words():
     morph = pymorphy2.MorphAnalyzer()
 
-    result = asyncio.run(split_by_words(morph, 'Во-первых, он хочет, чтобы'))
-    assert result == ['во-первых', 'хотеть', 'чтобы']
+    result = asyncio.run(split_by_words(morph, "Во-первых, он хочет, чтобы"))
+    assert result == ["во-первых", "хотеть", "чтобы"]
 
-    result = asyncio.run(split_by_words(morph, '«Удивительно, но это стало началом!»'))
-    assert result == ['удивительно', 'это', 'стать', 'начало']
+    result = asyncio.run(split_by_words(morph, "«Удивительно, но это стало началом!»"))
+    assert result == ["удивительно", "это", "стать", "начало"]
 
 
 def test_calculate_jaundice_rate():
     result = asyncio.run(calculate_jaundice_rate([], []))
     assert -0.01 < result < 0.01
 
-    result = asyncio.run(calculate_jaundice_rate(['все', 'аутсайдер', 'побег'], ['аутсайдер', 'банкротство']))
+    result = asyncio.run(
+        calculate_jaundice_rate(
+            ["все", "аутсайдер", "побег"], ["аутсайдер", "банкротство"]
+        )
+    )
     assert 33.0 < result < 34.0

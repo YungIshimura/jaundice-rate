@@ -1,6 +1,7 @@
 import asyncio
 import enum
 import time
+from typing import List
 
 import aiofiles
 import aiohttp
@@ -12,8 +13,6 @@ from adapters.exceptions import ArticleNotFound
 from adapters.inosmi_ru import sanitize
 from tools.text_tools import calculate_jaundice_rate, split_by_words
 
-# TODO продумать возможность для использования контекстного менеджера
-
 
 class ProcessingStatus(str, enum.Enum):
     OK = "OK"
@@ -22,7 +21,7 @@ class ProcessingStatus(str, enum.Enum):
     TIMEOUT = "TIMEOUT"
 
 
-async def get_charged_words(filepaths):
+async def get_charged_words(filepaths: List[str]) -> List[str]:
     charged_words = []
     for filepath in filepaths:
         async with aiofiles.open(filepath, mode="r") as file:
@@ -33,20 +32,20 @@ async def get_charged_words(filepaths):
     return charged_words
 
 
-async def fetch(session, url):
+async def fetch(session: aiohttp.ClientSession, url: str) -> str:
     async with session.get(url) as response:
         response.raise_for_status()
         return await response.text()
 
 
 async def process_article(
-    articles,
-    processed_articles=[],
-    charged_word_filepaths=[
+    articles: List[str],
+    processed_articles: List[dict] = [],
+    charged_word_filepaths: List[str] = [
         "charged_dict/negative_words.txt",
         "charged_dict/positive_words.txt",
-    ],
-):
+    ]
+) -> None:
     morph = pymorphy2.MorphAnalyzer()
     charged_words = await get_charged_words(charged_word_filepaths)
 
@@ -99,11 +98,10 @@ async def process_article(
                         "Слов в статье": None,
                     }
                 )
-                
 
 
-async def analyze(article_urls):
-    processed_articles = []
+async def analyze(article_urls: List[str]) -> List[dict]:
+    processed_articles: List[dict] = []
     async with anyio.create_task_group() as tg:
         tg.start_soon(process_article, article_urls, processed_articles)
 

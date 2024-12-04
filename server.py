@@ -3,7 +3,7 @@ from aiohttp import web
 from main import analyze
 
 
-async def handle(request):
+async def handle(request: web.Request) -> web.json_response:
     try:
         urls = request.query.get("urls")
         splited_urls = urls.split(",")
@@ -26,4 +26,4 @@ app = web.Application()
 app.add_routes([web.get("/", handle)])
 
 if __name__ == "__main__":
-    web.run_app(app, host="127.0.0.2")
+    web.run_app(app, host="127.0.0.1")
