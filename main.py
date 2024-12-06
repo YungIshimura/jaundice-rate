@@ -7,6 +7,7 @@ import aiofiles
 import aiohttp
 import anyio
 from async_timeout import timeout
+from pymorphy2 import MorphAnalyzer
 
 from adapters.exceptions import ArticleNotFound
 from adapters.inosmi_ru import sanitize
@@ -99,7 +100,7 @@ async def process_articles(
                 )
 
 
-async def analyze_urls(article_urls: List[str], morph) -> List[dict]:
+async def analyze_urls(article_urls: List[str], morph: MorphAnalyzer) -> List[dict]:
     processed_articles: List[dict] = []
     async with anyio.create_task_group() as tg:
         tg.start_soon(process_articles, morph, article_urls, processed_articles)
