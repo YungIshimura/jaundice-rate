@@ -1,5 +1,6 @@
-from aiohttp import web
 import pymorphy2
+from aiohttp import web
+
 from main import analyze_urls
 
 
