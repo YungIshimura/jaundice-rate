@@ -6,7 +6,6 @@ from typing import List
 import aiofiles
 import aiohttp
 import anyio
-import pymorphy2
 from async_timeout import timeout
 
 from adapters.exceptions import ArticleNotFound
@@ -38,7 +37,8 @@ async def fetch(session: aiohttp.ClientSession, url: str) -> str:
         return await response.text()
 
 
-async def process_article(
+async def process_articles(
+    morph,
     articles: List[str],
     processed_articles: List[dict] = [],
     charged_word_filepaths: List[str] = [
@@ -46,7 +46,6 @@ async def process_article(
         "charged_dict/positive_words.txt",
     ]
 ) -> None:
-    morph = pymorphy2.MorphAnalyzer()
     charged_words = await get_charged_words(charged_word_filepaths)
 
     async with aiohttp.ClientSession() as session:
@@ -100,9 +99,9 @@ async def process_article(
                 )
 
 
-async def analyze(article_urls: List[str]) -> List[dict]:
+async def analyze_urls(article_urls: List[str], morph) -> List[dict]:
     processed_articles: List[dict] = []
     async with anyio.create_task_group() as tg:
-        tg.start_soon(process_article, article_urls, processed_articles)
+        tg.start_soon(process_articles, morph, article_urls, processed_articles)
 
     return processed_articles
