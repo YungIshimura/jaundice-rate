@@ -22,8 +22,7 @@ async def handle(request: web.Request) -> web.json_response:
     return web.json_response(response)
 
 
-app = web.Application()
-app.add_routes([web.get("/", handle)])
-
 if __name__ == "__main__":
+    app = web.Application()
+    app.add_routes([web.get("/", handle)])
     web.run_app(app, host="127.0.0.1")
